@@ -1,0 +1,48 @@
+@import "tailwindcss";
+
+:root {
+  /* Neon palette for our synthwave-inspired theme */
+  --neon-primary: #40e0d0; /* minty cyan */
+  --neon-secondary: #f5d259; /* electric gold */
+  --neon-tertiary: #a28cff; /* soft violet */
+  --dark-bg: #0a0a23; /* near-black background */
+  --light-bg: #f5f5f5;
+  --text-light: #f5f5f5;
+  --text-dark: #0a0a23;
+  /* Font variables defined by next/font in layout.tsx */
+}
+
+/* Define CSS utility classes for neon colours so they can be referenced in JSX easily. */
+.text-neon-primary {
+  color: var(--neon-primary);
+}
+.text-neon-secondary {
+  color: var(--neon-secondary);
+}
+.text-neon-tertiary {
+  color: var(--neon-tertiary);
+}
+.bg-neon-primary {
+  background-color: var(--neon-primary);
+}
+.bg-neon-secondary {
+  background-color: var(--neon-secondary);
+}
+.bg-neon-tertiary {
+  background-color: var(--neon-tertiary);
+}
+
+/* Provide alpha variants using CSS custom properties; tailwind will allow adding opacity via /20 etc. */
+
+.bg-dark {
+  background-color: var(--dark-bg);
+}
+.drop-shadow-neon {
+  filter: drop-shadow(0 0 8px var(--neon-primary));
+}
+
+body {
+  background: var(--dark-bg);
+  color: var(--text-light);
+  font-family: var(--font-geist-sans, sans-serif);
+}
