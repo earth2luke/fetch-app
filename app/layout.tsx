@@ -1,6 +1,6 @@
 import "./globals.css";
 import "./neon.css";
-import AuthProvider from "./components/AuthProvider";
+import { AuthProvider } from "./components/AuthProvider";
 import Navbar from "./components/Navbar";
 
 export const metadata = {
