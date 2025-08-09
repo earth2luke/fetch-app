@@ -1,5 +1,3 @@
-"use client";
-
 import "./globals.css";
 import "./neon.css";
 import AuthProvider from "../components/AuthProvider";
