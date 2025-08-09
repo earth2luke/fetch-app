@@ -1,4 +1,4 @@
-/* Neon utility classes and backgrounds */
+/* Subtle animated grid bg you can place behind sections */
 .bg-neon-grid {
   background:
     radial-gradient(60rem 40rem at 80% -10%, rgba(34,211,238,.25), transparent),
@@ -9,19 +9,27 @@
   background-size: auto, auto, auto, 24px 24px, 24px 24px;
   animation: gridPulse 6s ease-in-out infinite alternate;
 }
+
 @keyframes gridPulse {
   from { opacity: .32; }
   to { opacity: .55; }
 }
+
+/* Glassmorphism panel style */
 .glass {
-  background: rgba(255,255,255,.06);
-  border: 1px solid rgba(255,255,255,.10);
-  box-shadow: var(--tw-shadow), 0 0 0 rgba(0,0,0,0);
+  background: rgba(255, 255, 255, .06);
+  border: 1px solid rgba(255, 255, 255, .10);
+  box-shadow: var(--tw-shadow), 0 0 0 rgba(0, 0, 0, 0);
   backdrop-filter: blur(10px);
 }
-.btn-cta {
-  @apply px-6 py-3 rounded-md bg-neon-primary/25 text-neon-primary hover:bg-neon-primary/35 transition;
-}
-.btn-ghost {
-  @apply px-6 py-3 rounded-md bg-white/10 text-gray-200 hover:bg-white/20 transition;
+
+/* Define custom button styles inside a components layer to allow Tailwind's @apply */
+@layer components {
+  .btn-cta {
+    @apply px-6 py-3 rounded-md bg-neon-primary/25 text-neon-primary hover:bg-neon-primary/35 transition;
+  }
+
+  .btn-ghost {
+    @apply px-6 py-3 rounded-md bg-white/10 text-gray-200 hover:bg-white/20 transition;
+  }
 }
