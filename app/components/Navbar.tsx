@@ -10,8 +10,10 @@ export default function Navbar() {
   const { user, logout } = useAuth();
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-3 backdrop-blur-md bg-black/40">
-      <Link href="/" className="text-2xl font-bold text-accent">Fetch</Link>
+    <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-3 backdrop-blur-md bg-black/50 border-b border-white/15">
+      <Link href="/" className="text-2xl font-bold text-accent">
+        Fetch
+      </Link>
       <div className="flex items-center gap-4">
         <Link
           href="/discover"
@@ -27,6 +29,20 @@ export default function Navbar() {
             Chats
           </Link>
         )}
+        <Link
+          href="/events"
+          className={pathname.startsWith("/events") ? "text-accent" : "text-white hover:text-accent"}
+        >
+          Events
+        </Link>
+        {user && user.role === "admin" && (
+          <Link
+            href="/admin"
+            className={pathname.startsWith("/admin") ? "text-accent" : "text-white hover:text-accent"}
+          >
+            Admin
+          </Link>
+        )}
         {user ? (
           <>
             <Link
@@ -36,7 +52,10 @@ export default function Navbar() {
               Profile
             </Link>
             <RoleBadge role={user.role} />
-            <button onClick={logout} className="ml-2 text-sm text-red-400 underline">
+            <button
+              onClick={logout}
+              className="ml-2 text-sm text-red-400 underline hover:text-red-500"
+            >
               Logout
             </button>
           </>
