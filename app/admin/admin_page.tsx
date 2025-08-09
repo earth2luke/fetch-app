@@ -7,6 +7,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../components/AuthProvider";
+// Import the Role type so we can cast the selected role instead of using `any`
+import type { Role } from "../components/AuthProvider";
 
 // Available roles for assignment. Keep this in sync with Role type in AuthProvider.
 const ROLE_OPTIONS = ["pup", "handler", "furry", "ally", "admin"] as const;
@@ -38,8 +40,8 @@ export default function AdminPage() {
     setUserList(getUsers());
   };
   const handleRoleChange = (id: string, role: string) => {
-    // Type cast to Role to satisfy TypeScript; the provider will validate input
-    changeUserRole(id, role as any);
+    // Cast the selected role string to the Role type defined in AuthProvider
+    changeUserRole(id, role as Role);
     setUserList(getUsers());
   };
   const handleToggleBlock = (id: string) => {
