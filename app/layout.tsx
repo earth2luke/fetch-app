@@ -1,7 +1,7 @@
 import "./globals.css";
 import "./neon.css";
-import AuthProvider from "../components/AuthProvider";
-import Navbar from "../components/Navbar";
+import AuthProvider from "./components/AuthProvider";
+import Navbar from "./components/Navbar";
 
 export const metadata = {
   title: "Fetch – Pup & Furry Connection",
