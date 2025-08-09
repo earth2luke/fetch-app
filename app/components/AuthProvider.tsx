@@ -11,6 +11,14 @@ import React, {
 // Extend Role type to include an administrator role for moderation.
 export type Role = "pup" | "handler" | "furry" | "ally" | "admin";
 
+// A list of special email addresses that should always be treated as
+// administrators. If a user signs up or logs in with one of these
+// emails, their role will automatically be elevated to "admin" and
+// existing stored data will be normalized to reflect that. This makes
+// it easy to bootstrap an initial admin account without having to
+// manually edit localStorage.
+const ADMIN_EMAILS = ["aaronrogers18@gmail.com"];
+
 // User profile stored in localStorage. Optional fields for extended user
 // information are included. A `blocked` flag is available for moderators to
 // temporarily suspend a user from interacting with others.
@@ -60,17 +68,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Load stored data on mount
+  // Load stored data on mount and normalize admin roles. If any stored
+  // user has an email in ADMIN_EMAILS, force their role to "admin".
   useEffect(() => {
     if (typeof window === "undefined") return;
     try {
       const storedUsers = localStorage.getItem("fetch_users");
       if (storedUsers) {
-        setUsers(JSON.parse(storedUsers));
+        const parsed: UserProfile[] = JSON.parse(storedUsers);
+        const normalized = parsed.map((u) =>
+          ADMIN_EMAILS.includes(u.email) && u.role !== "admin"
+            ? { ...u, role: "admin" as Role }
+            : u
+        );
+        setUsers(normalized);
       }
       const storedUser = localStorage.getItem("fetch_current_user");
       if (storedUser) {
-        setUser(JSON.parse(storedUser));
+        let parsedUser: UserProfile = JSON.parse(storedUser);
+        if (ADMIN_EMAILS.includes(parsedUser.email) && parsedUser.role !== "admin") {
+          parsedUser = { ...parsedUser, role: "admin" as Role };
+        }
+        setUser(parsedUser);
       }
     } catch (err) {
       console.error(err);
@@ -110,11 +129,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (users.some((u) => u.email === email)) {
       throw new Error("Email already exists");
     }
+    // Determine the role; if this email is in the ADMIN_EMAILS list,
+    // automatically elevate the user to an admin. Otherwise use the
+    // supplied role from the form.
+    const assignedRole: Role = ADMIN_EMAILS.includes(email) ? "admin" : role;
     const newUser: UserProfile = {
       id: generateId(),
       email,
       password,
-      role,
+      role: assignedRole,
       name,
       bio,
       interests,
@@ -130,7 +153,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (!found) {
       throw new Error("Invalid credentials");
     }
-    setUser(found);
+    // If the user logs in with an admin email but their stored role
+    // isn't yet admin, upgrade them and persist the change. This ensures
+    // previously registered accounts become admins without needing to
+    // manually adjust localStorage.
+    if (ADMIN_EMAILS.includes(found.email) && found.role !== "admin") {
+      const updatedUser = { ...found, role: "admin" as Role };
+      // update users array and localStorage
+      setUsers((prev) => prev.map((u) => (u.id === found.id ? updatedUser : u)));
+      setUser(updatedUser);
+    } else {
+      setUser(found);
+    }
   };
 
   const logout = () => {
