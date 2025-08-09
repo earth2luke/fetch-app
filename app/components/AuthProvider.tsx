@@ -22,14 +22,14 @@ const ADMIN_EMAILS = ["aaronrogers18@gmail.com"];
 // User profile stored in localStorage. Optional fields for extended user
 // information are included. A `blocked` flag is available for moderators to
 // temporarily suspend a user from interacting with others.
-export interface UserProfile {
+    export interface UserProfile {
   id: string;
   email: string;
   password: string;
   role: Role;
   name: string;
   bio?: string;
-  interests?: string[];
+      interests?: string;
   avatar?: string;
   blocked?: boolean;
 }
