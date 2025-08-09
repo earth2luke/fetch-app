@@ -1,11 +1,12 @@
+"use client";
+
 import "./globals.css";
 import "./neon.css";
-import { GeistSans } from "geist/font/sans";
-import AuthProvider from "./components/AuthProvider";
-import Navbar from "./components/Navbar";
+import AuthProvider from "../components/AuthProvider";
+import Navbar from "../components/Navbar";
 
 export const metadata = {
-  title: "Fetch — Pup & Furry Connection",
+  title: "Fetch – Pup & Furry Connection",
   description: "Connect with pups, handlers and furries in a playful safe space.",
 };
 
@@ -15,7 +16,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={GeistSans.className}>
+    <html lang="en">
       <body className="min-h-screen bg-black text-white bg-neon-grid">
         <AuthProvider>
           <Navbar />
