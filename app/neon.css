@@ -1,3 +1,8 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /* Subtle animated grid bg you can place behind sections */
 .bg-neon-grid {
   background:
