@@ -35,7 +35,8 @@ export interface UserProfile {
   email: string;
   password: string;
   role: Role;
-  name: string;
+  // Name is optional because profiles loaded from Firestore may not include it
+  name?: string;
   bio?: string;
   interests?: string[];
   avatar?: string;
@@ -174,7 +175,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const snap = await getDoc(doc(db, "users", fbUser.uid));
     let userProfile: UserProfile;
     if (snap.exists()) {
-    const data: { role?: Role; name?: string; bio?: string; interests?: string[]; avatar?: string; blocked?: boolean; } = snap.data();
+      const data = snap.data() as any;
       userProfile = {
         id: fbUser.uid,
         email: fbUser.email ?? "",
