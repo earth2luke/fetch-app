@@ -1,8 +1,15 @@
 "use client";
+
 import { useState, useEffect, FormEvent } from "react";
 import { useAuth, Role } from "../components/AuthProvider";
 import { useRouter } from "next/navigation";
 
+/**
+ * Profile editing page. Allows the logged-in user to update their name,
+ * role, bio and interests. A secondary button lets the user navigate
+ * to the Discover page to see their profile as others will, now that
+ * the Discover page includes the current user.
+ */
 export default function ProfilePage() {
   const { user, updateProfile, loading } = useAuth();
   const router = useRouter();
@@ -72,12 +79,19 @@ export default function ProfilePage() {
               onChange={(e) => setInterests(e.target.value)}
             />
           </div>
-          <button
-            type="submit"
-            className="btn-cta w-full"
-          >
-            Save
-          </button>
+          <div className="space-y-2">
+            <button type="submit" className="btn-cta w-full">
+              Save
+            </button>
+            {/* View Profile button navigates to discover page so the user can view their own profile */}
+            <button
+              type="button"
+              onClick={() => router.push("/discover")}
+              className="btn-glass w-full"
+            >
+              View Profile
+            </button>
+          </div>
         </form>
       </div>
     </main>
