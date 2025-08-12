@@ -87,7 +87,7 @@ export default function ProfilePage() {
             <button
               type="button"
               onClick={() => router.push("/discover")}
-              className="btn-glass w-full"
+              className="btn-ghost w-full"
             >
               View Profile
             </button>
