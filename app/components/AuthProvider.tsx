@@ -174,7 +174,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const snap = await getDoc(doc(db, "users", fbUser.uid));
     let userProfile: UserProfile;
     if (snap.exists()) {
-      const data = snap.data() as any;
+    const data: { role?: Role; name?: string; bio?: string; interests?: string[]; avatar?: string; blocked?: boolean; } = snap.data();
       userProfile = {
         id: fbUser.uid,
         email: fbUser.email ?? "",
