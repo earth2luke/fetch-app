@@ -1,0 +1,17 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    function isSignedIn() { return request.auth != null; }
+
+    // User avatars: users/{uid}/avatars/{filename}
+    match /users/{userId}/{allPaths=**} {
+      allow read: if true; // or restrict to signed-in
+      allow write: if isSignedIn() && request.auth.uid == userId;
+    }
+
+    // Everything else blocked by default
+    match /{path=**} {
+      allow read, write: if false;
+    }
+  }
+}
