@@ -6,9 +6,8 @@ import ProfileCard from "../components/ProfileCard";
 import { useRouter } from "next/navigation";
 
 /**
- * The discover page lists all other users in the system (excluding the
- * currently authenticated user) and allows filtering by role. Each profile
- * appears in a responsive grid with subtle animations on hover.
+ * The discover page lists all users in the system and allows filtering by role.
+ * The currently authenticated user is included in the list so they can view their own profile.
  */
 export default function DiscoverPage() {
   const { user, users } = useAuth();
@@ -23,7 +22,7 @@ export default function DiscoverPage() {
   }
 
   const filtered = users.filter((u) => {
-    if (u.id === user.id) return false;
+    // Include the current user in the list.
     return roleFilter === "all" || u.role === roleFilter;
   });
 
@@ -36,7 +35,13 @@ export default function DiscoverPage() {
       <h1 className="text-3xl font-bold text-neon-primary mb-4">Discover</h1>
       {/* Filter controls */}
       <div className="flex flex-wrap gap-2 mb-6">
-        {(["all", "pup", "handler", "furry", "ally"] as (Role | "all")[]).map((role) => (
+        {([
+          "all",
+          "pup",
+          "handler",
+          "furry",
+          "ally",
+        ] as (Role | "all")[]).map((role) => (
           <button
             key={role}
             onClick={() => handleFilter(role)}
@@ -46,7 +51,9 @@ export default function DiscoverPage() {
                 : "bg-white/10 text-gray-200 hover:bg-white/20"
             }`}
           >
-            {role === "all" ? "All" : role.charAt(0).toUpperCase() + role.slice(1)}
+            {role === "all"
+              ? "All"
+              : role.charAt(0).toUpperCase() + role.slice(1)}
           </button>
         ))}
       </div>
