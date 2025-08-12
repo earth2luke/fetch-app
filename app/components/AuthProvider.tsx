@@ -7,38 +7,41 @@ import React, {
   useEffect,
   ReactNode,
 } from "react";
+// Firebase imports
+import { auth, db } from "@/lib/firebase/client";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut as firebaseSignOut,
+  sendEmailVerification,
+  fetchSignInMethodsForEmail,
+} from "firebase/auth";
+import {
+  doc,
+  setDoc,
+  getDoc,
+  serverTimestamp,
+} from "firebase/firestore";
 
 // Extend Role type to include an administrator role for moderation.
 export type Role = "pup" | "handler" | "furry" | "ally" | "admin";
 
-// A list of special email addresses that should always be treated as
-// administrators. If a user signs up or logs in with one of these
-// emails, their role will automatically be elevated to "admin" and
-// existing stored data will be normalized to reflect that. This makes
-// it easy to bootstrap an initial admin account without having to
-// manually edit localStorage.
-const ADMIN_EMAILS = ["aaronrogers18@gmail.com"];
+// A list of special email addresses that should always be treated as administrators.
+// If a user signs up or logs in with one of these emails, their role will automatically be elevated to "admin".
+const ADMIN_EMAILS = ["aaronrogers810@gmail.com"];
 
-// User profile stored in localStorage. Optional fields for extended user
-// information are included. A `blocked` flag is available for moderators to
-// temporarily suspend a user from interacting with others.
-    export interface UserProfile {
+export interface UserProfile {
   id: string;
   email: string;
   password: string;
   role: Role;
   name: string;
   bio?: string;
-      interests?: string;
+  interests?: string[];
   avatar?: string;
   blocked?: boolean;
 }
 
-// AuthContext provides everything the rest of the app needs to manage
-// authentication state and user management. New functions have been added
-// to support administrative moderation such as retrieving all users,
-// deleting a user, updating a user’s role, and toggling a user’s blocked
-// status.
 interface AuthContextProps {
   user: UserProfile | null;
   loading: boolean;
@@ -86,7 +89,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const storedUser = localStorage.getItem("fetch_current_user");
       if (storedUser) {
         let parsedUser: UserProfile = JSON.parse(storedUser);
-        if (ADMIN_EMAILS.includes(parsedUser.email) && parsedUser.role !== "admin") {
+        if (
+          ADMIN_EMAILS.includes(parsedUser.email) &&
+          parsedUser.role !== "admin"
+        ) {
           parsedUser = { ...parsedUser, role: "admin" as Role };
         }
         setUser(parsedUser);
@@ -113,9 +119,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [user]);
 
-  // Helper to generate unique user IDs
-  const generateId = () => `${Date.now()}-${Math.random().toString(36).substring(2, 10)}`;
-
   const signup: AuthContextProps["signup"] = async ({
     email,
     password,
@@ -125,94 +128,152 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     interests,
     avatar,
   }) => {
-    // Ensure unique email
-    if (users.some((u) => u.email === email)) {
+    // Ensure the email is not already registered with Firebase
+    const methods = await fetchSignInMethodsForEmail(auth, email);
+    if (methods.length > 0) {
       throw new Error("Email already exists");
     }
-    // Determine the role; if this email is in the ADMIN_EMAILS list,
-    // automatically elevate the user to an admin. Otherwise use the
-    // supplied role from the form.
+    // Determine the assigned role
     const assignedRole: Role = ADMIN_EMAILS.includes(email) ? "admin" : role;
-    const newUser: UserProfile = {
-      id: generateId(),
-      email,
-      password,
+    // Create the user in Firebase Auth
+    const cred = await createUserWithEmailAndPassword(auth, email, password);
+    const fbUser = cred.user;
+    // Save the user profile to Firestore
+    await setDoc(doc(db, "users", fbUser.uid), {
+      id: fbUser.uid,
+      email: fbUser.email,
       role: assignedRole,
       name,
       bio,
       interests,
       avatar,
       blocked: false,
-    };
-    setUsers((prev) => [...prev, newUser]);
-    setUser(newUser);
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    });
+    // Send a verification email
+    await sendEmailVerification(fbUser);
+    // Sign out immediately so the user cannot log in until verified
+    await firebaseSignOut(auth);
+    // Throw an error to surface the verification message in the UI
+    throw new Error(
+      "A verification email has been sent. Please verify your email before logging in."
+    );
   };
 
   const login: AuthContextProps["login"] = async (email, password) => {
-    const found = users.find((u) => u.email === email && u.password === password);
-    if (!found) {
-      throw new Error("Invalid credentials");
+    // Sign in with Firebase Auth
+    const cred = await signInWithEmailAndPassword(auth, email, password);
+    const fbUser = cred.user;
+    // Require that the email is verified
+    if (!fbUser.emailVerified) {
+      await firebaseSignOut(auth);
+      throw new Error("Please verify your email before logging in.");
     }
-    // If the user logs in with an admin email but their stored role
-    // isn't yet admin, upgrade them and persist the change. This ensures
-    // previously registered accounts become admins without needing to
-    // manually adjust localStorage.
-    if (ADMIN_EMAILS.includes(found.email) && found.role !== "admin") {
-      const updatedUser = { ...found, role: "admin" as Role };
-      // update users array and localStorage
-      setUsers((prev) => prev.map((u) => (u.id === found.id ? updatedUser : u)));
-      setUser(updatedUser);
+    // Fetch the user's profile from Firestore
+    const snap = await getDoc(doc(db, "users", fbUser.uid));
+    let userProfile: UserProfile;
+    if (snap.exists()) {
+      const data = snap.data() as any;
+      userProfile = {
+        id: fbUser.uid,
+        email: fbUser.email ?? "",
+        password: "",
+        role: data.role as Role,
+        name: data.name,
+        bio: data.bio,
+        interests: data.interests,
+        avatar: data.avatar,
+        blocked: data.blocked,
+      };
     } else {
-      setUser(found);
+      // Fallback if the profile is missing
+      userProfile = {
+        id: fbUser.uid,
+        email: fbUser.email ?? "",
+        password: "",
+        role: "pup",
+        name: fbUser.displayName ?? "",
+        bio: "",
+        interests: [],
+        avatar: fbUser.photoURL ?? undefined,
+        blocked: false,
+      };
     }
+    // Update local state with the profile
+    setUser(userProfile);
+    setUsers((prev) => {
+      const exists = prev.some((u) => u.id === userProfile.id);
+      if (exists) {
+        return prev.map((u) => (u.id === userProfile.id ? userProfile : u));
+      }
+      return [...prev, userProfile];
+    });
   };
 
-  const logout = () => {
+  const logout = async () => {
+    await firebaseSignOut(auth);
     setUser(null);
   };
 
   const updateProfile: AuthContextProps["updateProfile"] = (updates) => {
     if (!user) return;
-    const updated = { ...user, ...updates } as UserProfile;
-    setUser(updated);
-    setUsers((prev) => prev.map((u) => (u.id === updated.id ? updated : u)));
+    const updatedUser: UserProfile = { ...user, ...updates };
+    setUsers((prev) => prev.map((u) => (u.id === updatedUser.id ? updatedUser : u)));
+    setUser(updatedUser);
+    // Persist updates to Firestore
+    setDoc(
+      doc(db, "users", updatedUser.id),
+      {
+        ...updates,
+        updatedAt: serverTimestamp(),
+      },
+      { merge: true }
+    ).catch((err) => console.error(err));
   };
 
-  // Administrative helpers
-  const getUsers = () => users;
+  const getUsers: AuthContextProps["getUsers"] = () => {
+    return users;
+  };
 
-  const deleteUser = (id: string) => {
+  const deleteUser: AuthContextProps["deleteUser"] = (id) => {
     setUsers((prev) => prev.filter((u) => u.id !== id));
-    // If the deleted user is currently logged in, log them out
-    if (user?.id === id) setUser(null);
+    // Optionally, delete from Firestore here
   };
 
-  const changeUserRole = (id: string, newRole: Role) => {
-    setUsers((prev) => prev.map((u) => (u.id === id ? { ...u, role: newRole } : u)));
-    if (user?.id === id) setUser({ ...user, role: newRole });
-  };
-
-  const toggleBlockUser = (id: string) => {
+  const changeUserRole: AuthContextProps["changeUserRole"] = (id, role) => {
     setUsers((prev) =>
-      prev.map((u) => (u.id === id ? { ...u, blocked: !u.blocked } : u))
+      prev.map((u) => (u.id === id ? { ...u, role } : u))
     );
-    if (user?.id === id) setUser({ ...user, blocked: !user.blocked });
   };
 
-  const value: AuthContextProps = {
-    user,
-    loading,
-    users,
-    signup,
-    login,
-    logout,
-    updateProfile,
-    getUsers,
-    deleteUser,
-    changeUserRole,
-    toggleBlockUser,
+  const toggleBlockUser: AuthContextProps["toggleBlockUser"] = (id) => {
+    setUsers((prev) =>
+      prev.map((u) =>
+        u.id === id ? { ...u, blocked: !u.blocked } : u
+      )
+    );
   };
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+
+  return (
+    <AuthContext.Provider
+      value={{
+        user,
+        users,
+        loading,
+        signup,
+        login,
+        logout,
+        updateProfile,
+        getUsers,
+        deleteUser,
+        changeUserRole,
+        toggleBlockUser,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
 };
 
 export function useAuth() {
