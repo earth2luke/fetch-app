@@ -52,17 +52,17 @@ export default function SignUpPage() {
     }
     setLoading(true);
     try {
-      await signup(
-        email.toLowerCase(),
-        formState.password,
-        formState.role,
-        formState.name.trim(),
-        formState.bio.trim() || undefined,
-        formState.interests
+      await signup({
+        email: email.toLowerCase(),
+        password: formState.password,
+        role: formState.role,
+        name: formState.name.trim(),
+        bio: formState.bio.trim() || undefined,
+        interests: formState.interests
           .split(",")
           .map((s) => s.trim())
-          .filter((s) => s.length > 0)
-      );
+          .filter((s) => s.length > 0),
+      });
       router.push("/profile");
     } catch (err: unknown) {
       if (err instanceof Error) {
