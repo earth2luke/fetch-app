@@ -57,6 +57,8 @@ export default function SignUpPage() {
         password: formState.password,
         role: formState.role,
         name: formState.name.trim(),
+        // Provide an explicit null avatar to avoid Firestore undefined errors
+        avatar: null,
         bio: formState.bio.trim() || undefined,
         interests: formState.interests
           .split(",")
