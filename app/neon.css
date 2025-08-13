@@ -26,15 +26,4 @@
   border: 1px solid rgba(255, 255, 255, .10);
   box-shadow: var(--tw-shadow), 0 0 0 rgba(0, 0, 0, 0);
   backdrop-filter: blur(10px);
-}
-
-/* Define custom button styles inside a components layer to allow Tailwind's @apply */
-@layer components {
-  .btn-cta {
-    @apply px-6 py-3 rounded-md bg-neon-primary/25 text-neon-primary hover:bg-neon-primary/35 transition;
-  }
-
-  .btn-ghost {
-    @apply px-6 py-3 rounded-md bg-white/10 text-gray-200 hover:bg-white/20 transition;
-  }
-}
+}}
