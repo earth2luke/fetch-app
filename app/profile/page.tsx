@@ -16,6 +16,7 @@ export default function ProfilePage() {
   const [name, setName] = useState("");
   const [role, setRole] = useState<Role>("pup");
   const [bio, setBio] = useState("");
+  // Interests are stored as a comma‑separated string in state for editing.
   const [interests, setInterests] = useState("");
 
   useEffect(() => {
@@ -26,13 +27,21 @@ export default function ProfilePage() {
       setName(user.name ?? "");
       setRole((user.role as Role) ?? "pup");
       setBio(user.bio ?? "");
-      setInterests(user.interests ?? "");
+      // Join interests array into a comma‑separated string for editing.
+      setInterests(user.interests?.join(", ") ?? "");
     }
   }, [loading, user, router]);
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    updateProfile({ name, role, bio, interests });
+    // Split the interests string on commas and trim whitespace.
+    // Empty strings are filtered out. This converts the string back into
+    // an array of interests for the profile update.
+    const interestsArray = interests
+      .split(",")
+      .map((i) => i.trim())
+      .filter((i) => i.length > 0);
+    updateProfile({ name, role, bio, interests: interestsArray });
   };
 
   return (
@@ -89,7 +98,8 @@ export default function ProfilePage() {
             >
               Save
             </button>
-            {/* View Profile button navigates to discover page so the user can view their own profile */}
+            {/* View Profile button navigates to discover page so the user
+                can view their own profile */}
             <button
               type="button"
               onClick={() => router.push('/discover')}
