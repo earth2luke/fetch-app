@@ -38,7 +38,9 @@ export default function ProfilePage() {
   return (
     <main className="min-h-screen flex items-center justify-center bg-neon-grid py-8 px-4 text-white">
       <div className="glass rounded-xl p-6 w-full max-w-lg">
-        <h1 className="text-3xl font-bold mb-6 text-neon-primary drop-shadow-neon">Edit Profile</h1>
+        <h1 className="text-3xl font-bold mb-6 text-neon-primary drop-shadow-neon">
+          Edit Profile
+        </h1>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block mb-1 text-sm">Name</label>
@@ -80,14 +82,18 @@ export default function ProfilePage() {
             />
           </div>
           <div className="space-y-2">
-            <button type="submit" className="btn-cta w-full">
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-2 rounded-md bg-neon-primary/30 text-neon-primary font-medium hover:bg-neon-primary/40 focus:ring-2 focus:ring-neon-primary disabled:opacity-50 disabled:cursor-not-allowed"
+            >
               Save
             </button>
             {/* View Profile button navigates to discover page so the user can view their own profile */}
             <button
               type="button"
-              onClick={() => router.push("/discover")}
-              className="btn-ghost w-full"
+              onClick={() => router.push('/discover')}
+              className="w-full py-2 rounded-md bg-white/10 text-neon-primary hover:bg-white/20 focus:ring-2 focus:ring-neon-primary"
             >
               View Profile
             </button>
