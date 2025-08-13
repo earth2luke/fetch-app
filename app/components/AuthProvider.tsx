@@ -140,14 +140,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const cred = await createUserWithEmailAndPassword(auth, email, password);
     const fbUser = cred.user;
     // Save the user profile to Firestore
+    // Persist the user profile to Firestore, ensuring optional fields fall back
+    // to sane defaults (null or empty array) so that undefined values are never
+    // sent to Firestore. Firestore rejects undefined values when using setDoc.
     await setDoc(doc(db, "users", fbUser.uid), {
       id: fbUser.uid,
       email: fbUser.email,
       role: assignedRole,
       name,
-      bio,
-      interests,
-      avatar,
+      // If bio is undefined or empty string, store null; Firestore does not
+      // allow undefined values
+      bio: bio ?? null,
+      // If interests is undefined, default to empty array
+      interests: interests ?? [],
+      // If avatar is undefined, default to null to avoid Firestore undefined errors
+      avatar: avatar ?? null,
       blocked: false,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
