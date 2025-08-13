@@ -1,17 +1,16 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Subtle animated grid bg you can place behind sections */
+/* Subtle animated grid you can place behind sections */
 .bg-neon-grid {
   background:
-    radial-gradient(60rem 40rem at 80% -10%, rgba(34,211,238,.25), transparent),
-    radial-gradient(40rem 30rem at 10% -10%, rgba(16,247,165,.22), transparent),
-    radial-gradient(30rem 20rem at 50% 120%, rgba(253,224,71,.15), transparent),
-    linear-gradient(to right, rgba(255,255,255,0.06) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255,255,255,0.06) 1px, transparent 1px);
-  background-size: auto, auto, auto, 24px 24px, 24px 24px;
+    radial-gradient(60rem 40rem at 80% -10%, rgba(34, 211, 238, .25), transparent),
+    radial-gradient(40rem 30rem at 10% -10%, rgba(16, 247, 165, .12), transparent),
+    radial-gradient(30rem 20rem at 50% 100%, rgba(253, 224, 71, .15), transparent),
+    linear-gradient(to right, rgba(255, 255, 255, 0.1) 0px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 0px, transparent 1px);
+  background-size: auto, auto, 24px 24px, 24px 24px;
   animation: gridPulse 6s ease-in-out infinite alternate;
 }
 
@@ -22,7 +21,8 @@
 
 /* Glassmorphism panel style */
 .glass {
-  background: rgba(255, 255, 255, .06);
-  border: 1px solid rgba(255, 255, 255, .10);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.10);
   box-shadow: var(--tw-shadow), 0 0 0 rgba(0, 0, 0, 0);
-  backdrop-filter: blur(10px);}
+  backdrop-filter: blur(10px);
+}
