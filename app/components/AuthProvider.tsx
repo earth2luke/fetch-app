@@ -175,17 +175,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const snap = await getDoc(doc(db, "users", fbUser.uid));
     let userProfile: UserProfile;
     if (snap.exists()) {
-      const data = snap.data() as any;
+      // Casting to Partial<UserProfile> instead of any satisfies the
+      // eslint rule against explicit `any` while allowing unknown fields.
+      const data = snap.data() as Partial<UserProfile>;
       userProfile = {
         id: fbUser.uid,
         email: fbUser.email ?? "",
         password: "",
-        role: data.role as Role,
-        name: data.name,
-        bio: data.bio,
-        interests: data.interests,
+        role: (data.role ?? "pup") as Role,
+        name: data.name ?? "",
+        bio: data.bio ?? "",
+        interests: data.interests ?? [],
         avatar: data.avatar,
-        blocked: data.blocked,
+        blocked: data.blocked ?? false,
       };
     } else {
       // Fallback if the profile is missing
