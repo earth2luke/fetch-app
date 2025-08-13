@@ -5,7 +5,11 @@ import RoleBadge from "./RoleBadge";
 
 export interface Profile {
   id: string;
-  name: string;
+  /**
+   * User's display name. Optional because profiles loaded from Firestore
+   * may not include a name yet.
+   */
+  name?: string;
   role: string;
   tagline?: string;
   bio?: string;
@@ -17,11 +21,11 @@ export default function ProfileCard({ profile }: { profile: Profile }) {
     <div className="rounded-xl p-4 bg-black/30 backdrop-blur-lg hover:shadow-lg hover:scale-105 transition transform duration-300">
       <img
         src={profile.avatar || "https://placehold.co/300x200?text=Avatar"}
-        alt={profile.name}
+        alt={profile.name || "User avatar"}
         className="w-full h-40 object-cover rounded-md mb-3"
       />
       <div className="flex items-center justify-between mb-1">
-        <h3 className="text-lg font-semibold text-white">{profile.name}</h3>
+        <h3 className="text-lg font-semibold text-white">{profile.name || ""}</h3>
         <RoleBadge role={profile.role} />
       </div>
       {profile.tagline && (
