@@ -8,14 +8,10 @@ export const metadata = {
   description: "Connect with pups, handlers and furries in a playful safe space.",
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode; }) {
   return (
     <html lang="en">
-      <body className="min-h-screen bg-black text-white bg-neon-grid">
+      <body className="min-h-screen bg-black text-white">
         <AuthProvider>
           <Navbar />
           <div className="pt-16 px-4">{children}</div>
