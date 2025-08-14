@@ -1,5 +1,5 @@
 import "./globals.css";
-import "./neon.css";
+
 import { AuthProvider } from "./components/AuthProvider";
 import Navbar from "./components/Navbar";
 
